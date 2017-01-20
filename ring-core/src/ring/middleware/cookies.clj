@@ -23,7 +23,8 @@
        :doc "Attributes defined by RFC6265 that apply to the Set-Cookie header."}
   set-cookie-attrs
   {:domain "Domain", :max-age "Max-Age", :path "Path"
-   :secure "Secure", :expires "Expires", :http-only "HttpOnly"})
+   :secure "Secure", :expires "Expires", :http-only "HttpOnly"
+   :same-site "SameSite"})
 
 (def ^:private rfc822-formatter
   (with-locale (formatters :rfc822) java.util.Locale/US))
@@ -68,6 +69,7 @@
        (case key
          :max-age (or (instance? Interval value) (integer? value))
          :expires (or (instance? DateTime value) (string? value))
+         :same-site (contains? #{"Strict" "Lax"} value)
          true)))
 
 (defn- write-attr-map
@@ -153,7 +155,8 @@
   :expires   - a date string at which the cookie will expire
   :secure    - set to true if the cookie requires HTTPS, prevent HTTP access
   :http-only - set to true if the cookie is valid for HTTP and HTTPS only
-               (ie. prevent JavaScript access)"
+               (ie. prevent JavaScript access)
+  :same-site - set to \"Strict\" or \"Lax\" to set SameSite attribute of the cookie"
   ([handler]
    (wrap-cookies handler {}))
   ([handler options]
